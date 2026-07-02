@@ -1,78 +1,44 @@
-PRVA LABORATORIJSKA VJEŽBA: SIMETRIČNA KRIPTOGRAFIJA
+FIRST LABORATORY ASSIGNMENT: SYMMETRIC CRYPTOGRAPHY
+1. PASSWORD PROTECTION MECHANISM
 
-1. MEHANIZAM ZAŠTITE ZAPORKI
+The system secures stored passwords using a combination of modern cryptographic algorithms:
 
-Sustav osigurava pohranjene zaporke kombinacijom suvremenih 
-kriptografskih algoritama:
+    a) PBKDF2:
+    The master password is not used directly as a key. Instead, the system utilizes PBKDF2 with a fixed salt to derive a 128-bit AES key. This protects the system against      brute-force attacks.
 
-a) PBKDF2:
-Glavna zaporka (master password) se ne koristi izravno kao 
-ključ. Umjesto toga, sustav koristi PBKDF2 s fiksnom soli 
-(salt) kako bi generirao 128-bitni AES ključ. Ovo štiti 
-sustav od brute-force napada.
+    b) AES-EAX:
+    AES in EAX mode is used for encryption. EAX provides authenticated encryption, meaning that in addition to confidentiality (ensuring no one can see the password), the      system also guarantees integrity (ensuring no one has tampered with the data). Each entry has its own unique 'nonce' and 'tag'.
 
-b) AES-EAX:
-Za enkripciju se koristi AES u EAX načinu rada. EAX pruža 
-autentičnu enkripciju, što znači da osim povjerljivosti 
-(da nitko ne vidi lozinku), sustav jamči i integritet 
-(da nitko nije mijenjao podatke). Svaki unos ima svoj 
-jedinstveni 'nonce' i 'tag'.
+    c) SHA-256:
+    Service addresses (e.g., google.com) are stored as SHA-256 hashes with an appended secret string (salt). This prevents an attacker from discovering which services the      user is using by simply inspecting the storage file.
 
-c) SHA-256:
-Adrese servisa (npr. google.com) pohranjuju se kao SHA-256 
-sažeci s dodatkom tajnog niza. Time je onemogućeno da 
-napadač jednostavnim pregledom datoteke ne sazna koje servise 
-korisnik koristi.
+2. SECURITY REQUIREMENTS
 
-2. SIGURNOSNI ZAHTJEVI
+The system satisfies the following security requirements:
 
-Sustav zadovoljava sljedeće zahtjeve:
+    PASSWORD CONFIDENTIALITY: Passwords are encrypted using the AES algorithm. Without knowing the master password, the content remains unreadable. An attacker cannot          determine if passwords for two different addresses are identical, cannot determine the password length, and cannot determine whether a password remained the same after     an update.
 
--POVJERLJIVOST ZAPORKI: Zaporke su kriptirane algoritmom AES. Bez 
-poznavanja master zaporke, sadržaj je nečitljiv. Ne mpže odrediti jesu li zaporke za 
-dvije različite adrese jednake, duljinu zaporke te pri promjeni zaporke
-za adresu ne može odrediti je li ostala ista.
-POVJERLJIVOST ADRESA: Napadač ne može odrediti adrese jer su pohranjene kao
-SHA-256 sažeci.
-OTPORNOST NA ANALIZU: Zbog korištenja nasumičnog nonce-a, 
-ista zaporka spremljena za dva različita servisa rezultirat 
-će potpuno različitim kriptogramima u datoteci.
+    ADDRESS CONFIDENTIALITY: An attacker cannot determine the service addresses because they are stored as SHA-256 hashes.
 
-3. STRUKTURA POHRANE
+    ANALYSIS RESISTANCE: Due to the use of a randomized nonce, saving the exact same password for two different services will result in completely different ciphertexts in     the storage file.
 
-Podaci se u 'lab1passwords.txt' pohranjuju u formatu:
-[Hash adrese] [Kriptogram zaporke] [Tag] [Nonce]
+3. STORAGE STRUCTURE
 
-4. UPUTE ZA KORIŠTENJE I AUTOMATSKO TESTIRANJE
+Data is stored in lab1passwords.txt using the following format:
+[Address Hash] [Password Ciphertext] [Tag] [Nonce]
 
-Master password je lab1mp.
+4. USAGE INSTRUCTIONS AND AUTOMATED TESTING
 
-Sustav podržava naredbe:
-get [Master password] [adresa] (dohvat adrese)
-put [Master password] [adresa] [zaporka] (dodavanje adrese u bazu)
-delete [Master password] ("resetiranje" baze)
-exit (izlaz)
+The master password is lab1mp.
 
+The system supports the following commands:
 
-Za automatsko testiranje, pozicionirati se unutar mape i pokrenuti automatic.sh s naredbom ./autimatic.sh.
+    get [Master password] [address] (Retrieve a password)
 
-Opis naredbi unutar testnog primjera:
+    put [Master password] [address] [password] (Add/update a password in the database)
 
-put lab1mp google.com 123	-- Ispravan unos zaporke
-get lab1mp google.coM		-- Ispravan dohvat zaporke
-put lab1mp google.com 12345	-- Ispravna zamjena zaporke 
-get lab1mp google.com		-- Dohvat koji potvrđuje zamjenu zaporke
-put lab1mp instagram.com sifra	-- Ispravan unos druge zaporke
-get lab1mp instagram.com sifra	-- Ispravan dohvat druge zaporke
-put labospas instagram.com provjera	-- Unos zaporke s krivim masterom
-get labospas google.com		-- Dohvat zaporke s krivim masterom
-uzmi labmp1 google.com		-- Nepostojeća naredba
-get lab1mp facebook.com		-- Dohvat nepostojeće adrese
-delete lab1mp				-- Brisanje baze
-Y
-exit						-- Izlaz
+    delete [Master password] (Reset/wipe the database)
 
-Sustav je testiran na Ubuntu 24.04.2
+    exit (Exit the application)
 
-
-
+For automated testing, navigate to the project directory and run automatic.sh using the command: ./automatic.sh.
